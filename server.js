@@ -46,6 +46,12 @@ app.post('/assinar', async (req, res) => {
                     transaction_amount: 59.00,
                     currency_id: 'BRL'
                 },
+                payment_methods_allowed: {
+                    payment_types: [
+                        { id: 'credit_card' },
+                        { id: 'pix' }
+                    ]
+                },
                 back_url: 'https://www.suellenseragi.com.br',
                 payer_email: email,
                 external_reference: telefone,
