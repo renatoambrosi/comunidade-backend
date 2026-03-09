@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Comunidade — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #222;
+  --border: #2a2a2a;
+  --border2: #333;
+  --text: #e8e8e8;
+  --muted: #666;
+  --muted2: #888;
+  --green: #22c55e;
+  --green-bg: rgba(34,197,94,.12);
+  --yellow: #eab308;
+  --yellow-bg: rgba(234,179,8,.12);
+  --red: #ef4444;
+  --red-bg: rgba(239,68,68,.12);
+  --blue: #3b82f6;
+  --blue-bg: rgba(59,130,246,.12);
+  --orange: #f97316;
+  --orange-bg: rgba(249,115,22,.12);
+  --accent: #a78bfa;
+  --accent-bg: rgba(167,139,250,.12);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* HEADER */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; position: sticky; top: 0; z-index: 50;
+}
+.logo { font-size: .95rem; font-weight: 700; letter-spacing: -.01em; }
+.logo span { color: var(--accent); }
+.header-right { display: flex; align-items: center; gap: 12px; }
+#lastUpdate { font-size: .72rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+.btn-refresh {
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--muted2); padding: 6px 12px; border-radius: 6px;
+  cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: .78rem; font-weight: 500;
+  transition: all 120ms;
+}
+.btn-refresh:hover { color: var(--text); border-color: var(--accent); }
+
+/* TABS */
+.tabs {
+  display: flex; gap: 2px; padding: 16px 28px 0;
+  border-bottom: 1px solid var(--border); background: var(--surface);
+  overflow-x: auto;
+}
+.tab {
+  padding: 9px 16px; border: none; background: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 500;
+  color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px;
+  white-space: nowrap; transition: all 120ms;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab:hover { color: var(--text); }
+
+/* CONTENT */
+.content { padding: 24px 28px; max-width: 1400px; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* STATS */
+.stats { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.stat {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px 20px; min-width: 120px; flex: 1;
+}
+.stat .num { font-size: 1.8rem; font-weight: 700; line-height: 1; font-family: 'DM Mono', monospace; }
+.stat .lbl { font-size: .72rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .06em; }
+.stat.green .num { color: var(--green); }
+.stat.yellow .num { color: var(--yellow); }
+.stat.red .num { color: var(--red); }
+.stat.blue .num { color: var(--blue); }
+.stat.orange .num { color: var(--orange); }
+
+/* CARD */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden; margin-bottom: 20px;
+}
+.card-header {
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  font-weight: 600; font-size: .85rem;
+}
+.card-header .actions { display: flex; gap: 8px; align-items: center; }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  padding: 9px 14px; text-align: left;
+  font-size: .68rem; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: .82rem; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.02); }
+.empty { text-align: center; padding: 40px; color: var(--muted); font-size: .85rem; }
+.mono { font-family: 'DM Mono', monospace; font-size: .78rem; color: var(--muted2); }
+
+/* BADGES */
+.badge {
+  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px;
+  font-size: .68rem; font-weight: 600; white-space: nowrap;
+}
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-yellow { background: var(--yellow-bg); color: var(--yellow); }
+.badge-red { background: var(--red-bg); color: var(--red); }
+.badge-blue { background: var(--blue-bg); color: var(--blue); }
+.badge-orange { background: var(--orange-bg); color: var(--orange); }
+.badge-gray { background: rgba(255,255,255,.06); color: var(--muted2); }
+.badge-purple { background: var(--accent-bg); color: var(--accent); }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: 6px; border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; font-size: .76rem; font-weight: 600;
+  transition: all 120ms; white-space: nowrap;
+}
+.btn:hover { opacity: .8; }
+.btn:disabled { opacity: .3; cursor: not-allowed; }
+.btn-primary { background: var(--accent); color: #0f0f0f; }
+.btn-ghost { background: transparent; color: var(--muted2); border: 1px solid var(--border2); }
+.btn-ghost:hover { color: var(--text); border-color: var(--muted2); }
+.btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239,68,68,.2); }
+.btn-success { background: var(--green-bg); color: var(--green); border: 1px solid rgba(34,197,94,.2); }
+.btn-warn { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(234,179,8,.2); }
+.btn-add { background: var(--accent); color: #0f0f0f; padding: 7px 14px; font-size: .8rem; }
+
+.action-row { display: flex; gap: 4px; flex-wrap: wrap; }
+
+/* MODAL */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.7); z-index: 100;
+  align-items: center; justify-content: center; backdrop-filter: blur(4px);
+}
+.overlay.show { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 14px; padding: 28px; width: 100%; max-width: 460px; margin: 20px;
+}
+.modal h3 { font-size: 1rem; font-weight: 700; margin-bottom: 20px; }
+.field { margin-bottom: 14px; }
+.field label { font-size: .72rem; font-weight: 600; color: var(--muted2); display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .06em; }
+.field input, .field select, .field textarea {
+  width: 100%; background: var(--bg); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 9px 12px; font-family: 'DM Sans', sans-serif;
+  font-size: .88rem; color: var(--text); outline: none; transition: border 120ms;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+.field textarea { resize: vertical; min-height: 120px; }
+.field select option { background: var(--surface2); }
+.modal-btns { display: flex; gap: 8px; margin-top: 20px; }
+.modal-btns .btn { flex: 1; justify-content: center; height: 38px; font-size: .85rem; }
+
+/* MENSAGENS EDITOR */
+.msg-card {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 16px; margin-bottom: 12px;
+}
+.msg-card .msg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.msg-card .msg-titulo { font-size: .82rem; font-weight: 600; color: var(--accent); }
+.msg-card .msg-chave { font-family: 'DM Mono', monospace; font-size: .68rem; color: var(--muted); }
+.msg-card textarea {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 10px 12px; font-family: 'DM Mono', monospace;
+  font-size: .78rem; color: var(--text); outline: none; resize: vertical; min-height: 100px;
+  transition: border 120ms;
+}
+.msg-card textarea:focus { border-color: var(--accent); }
+.msg-card .msg-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.msg-hint { font-size: .7rem; color: var(--muted); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); padding: 12px 18px;
+  border-radius: 8px; font-weight: 500; font-size: .85rem;
+  opacity: 0; transition: opacity 250ms; z-index: 200; pointer-events: none;
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.show { opacity: 1; }
+.toast.ok { border-color: var(--green); color: var(--green); }
+.toast.err { border-color: var(--red); color: var(--red); }
+
+/* EVENTO */
+.evento-row td { font-size: .78rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Comunidade <span>Admin</span></div>
+  <div class="header-right">
+    <span id="lastUpdate"></span>
+    <button class="btn-refresh" onclick="carregar()">↻ Atualizar</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="tab('membros',this)">👥 Membros</button>
+  <button class="tab" onclick="tab('mensagens',this)">✉️ Mensagens</button>
+  <button class="tab" onclick="tab('excecoes',this)">🛡️ Exceções</button>
+  <button class="tab" onclick="tab('eventos',this)">📋 Eventos</button>
+</div>
+
+<div class="content">
+
+  <!-- STATS -->
+  <div class="stats" id="statsBar">
+    <div class="stat green"><div class="num" id="s-ativos">—</div><div class="lbl">Ativos</div></div>
+    <div class="stat yellow"><div class="num" id="s-atrasados">—</div><div class="lbl">Atrasados</div></div>
+    <div class="stat orange"><div class="num" id="s-cancelados">—</div><div class="lbl">Cancelados</div></div>
+    <div class="stat red"><div class="num" id="s-chargebacks">—</div><div class="lbl">Chargebacks</div></div>
+    <div class="stat blue"><div class="num" id="s-total">—</div><div class="lbl">Total</div></div>
+  </div>
+
+  <!-- MEMBROS -->
+  <div class="panel active" id="panel-membros">
+    <div class="card">
+      <div class="card-header">
+        Membros
+        <div class="actions">
+          <button class="btn btn-ghost" onclick="runScheduler('remocoes')" title="Executar verificação de remoções agora">⏰ Forçar Remoções</button>
+          <button class="btn btn-ghost" onclick="runScheduler('mensagens')" title="Executar ciclo de mensagens agora">📨 Forçar Mensagens</button>
+          <button class="btn btn-add" onclick="abrirModal('membro')">+ Adicionar</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Nome</th><th>Telefone</th><th>Método</th>
+            <th>Status</th><th>Próx. Pagamento</th><th>Remoção Agend.</th><th>Ações</th>
+          </tr></thead>
+          <tbody id="tbMembros"><tr><td colspan="7" class="empty">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENSAGENS -->
+  <div class="panel" id="panel-mensagens">
+    <div class="card">
+      <div class="card-header">Editor de Mensagens <span style="color:var(--muted);font-size:.75rem;font-weight:400">Use {nome} para o nome do membro</span></div>
+      <div style="padding:20px" id="msgEditor">Carregando...</div>
+    </div>
+  </div>
+
+  <!-- EXCEÇÕES -->
+  <div class="panel" id="panel-excecoes">
+    <div class="card">
+      <div class="card-header">
+        Números de Exceção
+        <button class="btn btn-add" onclick="abrirModal('excecao')">+ Adicionar</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Telefone</th><th>Nome</th><th>Motivo</th><th>Criado em</th><th>Ações</th></tr></thead>
+          <tbody id="tbExcecoes"><tr><td colspan="5" class="empty">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVENTOS -->
+  <div class="panel" id="panel-eventos">
+    <div class="card">
+      <div class="card-header">Log de Eventos (últimos 200)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Data</th><th>Nome</th><th>Evento</th><th>Ação</th><th>Status</th><th>Detalhes</th></tr></thead>
+          <tbody id="tbEventos"><tr><td colspan="6" class="empty">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="modalTitulo"></h3>
+    <div id="modalBody"></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let dados = {};
+let modalTipo = '';
+
+// ── TABS ──
+function tab(nome, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + nome).classList.add('active');
+}
+
+// ── TOAST ──
+function toast(msg, tipo = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = (tipo === 'ok' ? '✓ ' : '✕ ') + msg;
+  t.className = 'toast show ' + tipo;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+// ── FORMATAÇÃO ──
+function fmt(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+function esc(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function badgeStatus(s) {
+  const map = {
+    ativo: 'green', atrasado: 'yellow', cancelado: 'orange',
+    reembolsado: 'blue', chargeback: 'red', removido: 'gray'
+  };
+  return `<span class="badge badge-${map[s]||'gray'}">${s}</span>`;
+}
+
+function badgeMetodo(m) {
+  if (!m) return '<span class="badge badge-gray">—</span>';
+  const isPix = m.toLowerCase().includes('pix');
+  return `<span class="badge ${isPix ? 'badge-purple' : 'badge-blue'}">${m}</span>`;
+}
+
+// ── CARREGAR ──
+async function carregar() {
+  try {
+    const r = await fetch('/admin/dados');
+    if (r.status === 401) { location.reload(); return; }
+    dados = await r.json();
+
+    const s = dados.stats || {};
+    document.getElementById('s-ativos').textContent = s.ativos || 0;
+    document.getElementById('s-atrasados').textContent = s.atrasados || 0;
+    document.getElementById('s-cancelados').textContent = s.cancelados || 0;
+    document.getElementById('s-chargebacks').textContent = s.chargebacks || 0;
+    document.getElementById('s-total').textContent = s.total || 0;
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('pt-BR');
+
+    renderMembros();
+    renderMensagens();
+    renderExcecoes();
+    renderEventos();
+  } catch (err) {
+    toast('Erro ao carregar dados', 'err');
+  }
+}
+
+// ── MEMBROS ──
+function renderMembros() {
+  const tb = document.getElementById('tbMembros');
+  const membros = dados.membros || [];
+  if (!membros.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">Nenhum membro</td></tr>'; return; }
+
+  tb.innerHTML = membros.map(m => {
+    const temRemocao = m.remocao_agendada && m.status !== 'removido';
+    return `<tr>
+      <td><strong>${esc(m.nome||'—')}</strong><br><span class="mono">${esc(m.email||'')}</span></td>
+      <td class="mono">${esc(m.telefone_formatado||m.telefone||'—')}</td>
+      <td>${badgeMetodo(m.payment_method)}</td>
+      <td>${badgeStatus(m.status)}</td>
+      <td class="mono">${fmt(m.next_payment)}</td>
+      <td>${temRemocao ? `<span class="badge badge-orange">${fmt(m.remocao_agendada)}</span>` : '—'}</td>
+      <td>
+        <div class="action-row">
+          ${m.status !== 'removido' ? `<button class="btn btn-danger" onclick="removerMembro('${esc(m.subscription_id)}','${esc(m.nome||'')}')">✕ Remover</button>` : ''}
+          ${temRemocao ? `<button class="btn btn-success" onclick="cancelarRemocao('${esc(m.subscription_id)}')">↩ Cancelar</button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function removerMembro(sub_id, nome) {
+  if (!confirm(`Remover ${nome} dos grupos agora?`)) return;
+  const r = await fetch(`/admin/membro/remover/${encodeURIComponent(sub_id)}`, { method: 'POST' });
+  const d = await r.json();
+  if (d.success) { toast(`${nome} removido`); carregar(); }
+  else toast(d.error || 'Erro', 'err');
+}
+
+async function cancelarRemocao(sub_id) {
+  const r = await fetch(`/admin/membro/cancelar-remocao/${encodeURIComponent(sub_id)}`, { method: 'POST' });
+  const d = await r.json();
+  if (d.success) { toast('Remoção cancelada'); carregar(); }
+  else toast(d.error || 'Erro', 'err');
+}
+
+// ── MENSAGENS ──
+function renderMensagens() {
+  const msgs = dados.mensagens || [];
+  if (!msgs.length) { document.getElementById('msgEditor').innerHTML = '<p style="color:var(--muted)">Sem mensagens configuradas</p>'; return; }
+
+  document.getElementById('msgEditor').innerHTML = msgs.map(m => `
+    <div class="msg-card">
+      <div class="msg-header">
+        <div>
+          <div class="msg-titulo">${esc(m.titulo)}</div>
+          <div class="msg-chave">${m.chave}</div>
+        </div>
+        <button class="btn btn-primary" onclick="salvarMensagem('${m.chave}')">Salvar</button>
+      </div>
+      <textarea id="msg-${m.chave}" rows="6">${esc(m.texto)}</textarea>
+      <div class="msg-footer">
+        <span class="msg-hint">Use {nome} para o nome do membro</span>
+        <span class="msg-hint">Atualizado: ${fmt(m.atualizado_em)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function salvarMensagem(chave) {
+  const texto = document.getElementById('msg-' + chave).value;
+  const r = await fetch(`/admin/mensagem/${chave}`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ texto })
+  });
+  const d = await r.json();
+  if (d.success) toast('Mensagem salva!');
+  else toast(d.error || 'Erro', 'err');
+}
+
+// ── EXCEÇÕES ──
+function renderExcecoes() {
+  const tb = document.getElementById('tbExcecoes');
+  const exc = dados.excecoes || [];
+  if (!exc.length) { tb.innerHTML = '<tr><td colspan="5" class="empty">Nenhuma exceção cadastrada</td></tr>'; return; }
+  tb.innerHTML = exc.map(e => `<tr>
+    <td class="mono">${esc(e.telefone)}</td>
+    <td>${esc(e.nome||'—')}</td>
+    <td>${esc(e.motivo||'—')}</td>
+    <td class="mono">${fmt(e.criado_em)}</td>
+    <td><button class="btn btn-danger" onclick="removerExcecao(${e.id},'${esc(e.telefone)}')">✕</button></td>
+  </tr>`).join('');
+}
+
+async function removerExcecao(id, tel) {
+  if (!confirm(`Remover ${tel} das exceções?`)) return;
+  const r = await fetch(`/admin/excecao/${id}`, { method: 'DELETE' });
+  const d = await r.json();
+  if (d.success) { toast('Exceção removida'); carregar(); }
+  else toast(d.error || 'Erro', 'err');
+}
+
+// ── EVENTOS ──
+function renderEventos() {
+  const tb = document.getElementById('tbEventos');
+  const evs = dados.eventos || [];
+  if (!evs.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">Sem eventos</td></tr>'; return; }
+
+  const eventoColor = {
+    order_approved: 'green', subscription_renewed: 'blue',
+    subscription_late: 'yellow', order_refunded: 'orange',
+    chargeback: 'red', subscription_canceled: 'orange',
+    admin_adicionar: 'purple', admin_remover: 'red',
+    scheduler_remocao: 'red', scheduler_mensagem: 'blue'
+  };
+
+  tb.innerHTML = evs.map(e => `<tr class="evento-row">
+    <td class="mono">${fmt(e.criado_em)}</td>
+    <td>${esc(e.nome||'—')}</td>
+    <td><span class="badge badge-${eventoColor[e.evento]||'gray'}">${esc(e.evento)}</span></td>
+    <td class="mono">${esc(e.acao||'—')}</td>
+    <td>${e.sucesso ? '<span class="badge badge-green">ok</span>' : '<span class="badge badge-red">erro</span>'}</td>
+    <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(e.detalhes||'')}">
+      <span class="mono">${esc((e.detalhes||'').substring(0,80))}</span>
+    </td>
+  </tr>`).join('');
+}
+
+// ── SCHEDULER MANUAL ──
+async function runScheduler(tipo) {
+  const labels = { mensagens: 'mensagens', remocoes: 'remoções' };
+  toast(`Executando ciclo de ${labels[tipo]}...`);
+  const r = await fetch(`/admin/scheduler/${tipo}`, { method: 'POST' });
+  const d = await r.json();
+  if (d.success) { toast(d.msg); carregar(); }
+  else toast(d.error || 'Erro', 'err');
+}
+
+// ── MODAL ──
+function abrirModal(tipo) {
+  modalTipo = tipo;
+  const titulos = { membro: '+ Adicionar Membro', excecao: '+ Adicionar Exceção' };
+  document.getElementById('modalTitulo').textContent = titulos[tipo];
+
+  const corpos = {
+    membro: `
+      <div class="field"><label>Nome *</label><input id="m-nome" placeholder="Nome completo"/></div>
+      <div class="field"><label>Telefone *</label><input id="m-tel" placeholder="11999999999"/></div>
+      <div class="field"><label>Email</label><input id="m-email" placeholder="email@exemplo.com"/></div>
+      <div class="field"><label>Método de Pagamento</label>
+        <select id="m-method">
+          <option value="manual">Manual</option>
+          <option value="pix">PIX</option>
+          <option value="credit_card">Cartão de Crédito</option>
+        </select>
+      </div>
+      <div class="field"><label>Próximo Pagamento</label><input id="m-next" type="date"/></div>
+    `,
+    excecao: `
+      <div class="field"><label>Telefone *</label><input id="e-tel" placeholder="11999999999"/></div>
+      <div class="field"><label>Nome</label><input id="e-nome" placeholder="Nome"/></div>
+      <div class="field"><label>Motivo</label><input id="e-motivo" placeholder="Ex: Moderador, Parceiro..."/></div>
+    `
+  };
+
+  document.getElementById('modalBody').innerHTML = corpos[tipo];
+  document.getElementById('overlay').classList.add('show');
+}
+
+function fecharModal() {
+  document.getElementById('overlay').classList.remove('show');
+}
+
+async function confirmarModal() {
+  try {
+    if (modalTipo === 'membro') {
+      const nome = document.getElementById('m-nome').value.trim();
+      const telefone = document.getElementById('m-tel').value.trim();
+      if (!nome || !telefone) { toast('Nome e telefone obrigatórios', 'err'); return; }
+      const body = {
+        nome, telefone,
+        email: document.getElementById('m-email').value.trim(),
+        payment_method: document.getElementById('m-method').value,
+        next_payment: document.getElementById('m-next').value || null
+      };
+      const r = await fetch('/admin/membro/adicionar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const d = await r.json();
+      if (d.success) { toast('Membro adicionado e grupos atualizados!'); fecharModal(); carregar(); }
+      else toast(d.error || 'Erro', 'err');
+    }
+
+    if (modalTipo === 'excecao') {
+      const telefone = document.getElementById('e-tel').value.trim();
+      if (!telefone) { toast('Telefone obrigatório', 'err'); return; }
+      const body = {
+        telefone,
+        nome: document.getElementById('e-nome').value.trim(),
+        motivo: document.getElementById('e-motivo').value.trim()
+      };
+      const r = await fetch('/admin/excecao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const d = await r.json();
+      if (d.success) { toast('Exceção adicionada!'); fecharModal(); carregar(); }
+      else toast(d.error || 'Erro', 'err');
+    }
+  } catch (err) {
+    toast('Erro de conexão', 'err');
+  }
+}
+
+document.getElementById('overlay').addEventListener('click', function(e) {
+  if (e.target === this) fecharModal();
+});
+
+carregar();
+setInterval(carregar, 60000);
+</script>
+</body>
+</html>
