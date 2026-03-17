@@ -10,18 +10,44 @@ const { adicionarNosGrupos, removerDosGrupos, formatarTelefone } = require('../w
 // ── HELPERS ──
 
 function extrairDados(body) {
-    const sub = body.Subscription || body.subscription || {};
-    const customer = body.Customer || body.customer || sub.Customer || sub.customer || {};
-    const order = body.Order || body.order || {};
+    // A Kiwify envia tudo dentro de body.order
+    const order = body.order || body.Order || body;
 
-    const nome = customer.name || customer.nome || '';
+    const customer = order.Customer || order.customer || body.Customer || body.customer || {};
+    const sub = order.Subscription || order.subscription || body.Subscription || body.subscription || {};
+
+    const nome = customer.full_name || customer.name || customer.nome || '';
     const email = customer.email || '';
-    const telefone = customer.mobile_phone_number || customer.phone || customer.telefone || '';
-    const subscription_id = sub.id || sub.subscription_id || body.subscription_id || '';
-    const order_id = order.id || order.order_id || body.order_id || '';
-    const payment_method = order.payment_method || sub.payment_method || body.payment_method || '';
 
-    // next_payment pode vir em diferentes campos
+    // Kiwify envia telefone em customer.mobile (ex: "+5562998257978")
+    const telefone =
+        customer.mobile ||
+        customer.mobile_phone_number ||
+        customer.phone ||
+        customer.telefone ||
+        '';
+
+    // subscription_id está em order.subscription_id
+    const subscription_id =
+        order.subscription_id ||
+        sub.id ||
+        sub.subscription_id ||
+        body.subscription_id ||
+        '';
+
+    const order_id =
+        order.order_id ||
+        order.id ||
+        body.order_id ||
+        '';
+
+    const payment_method =
+        order.payment_method ||
+        sub.payment_method ||
+        body.payment_method ||
+        '';
+
+    // next_payment vem em order.Subscription.next_payment
     const next_payment_raw =
         sub.next_payment ||
         sub.next_payment_date ||
@@ -52,7 +78,8 @@ router.post('/kiwify', async (req, res) => {
     // Responde imediatamente para Kiwify não retentar
     res.status(200).json({ received: true });
 
-    const evento = req.body.event || req.body.webhook_event_type || '';
+    // Kiwify envia webhook_event_type dentro de body.order
+    const evento = req.body.order?.webhook_event_type || req.body.webhook_event_type || req.body.event || '';
     console.log(`\n🔔 WEBHOOK: ${evento}`, JSON.stringify(req.body).substring(0, 300));
 
     try {
