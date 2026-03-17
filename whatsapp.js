@@ -21,13 +21,6 @@ async function gerenciarGrupos(telefone, acao) {
     const numero = formatarTelefone(telefone);
     const resultados = [];
 
-    // ── DIAGNÓSTICO ──
-    console.log(`🔍 URL: ${evolutionUrl}/group/updateParticipant/${instanceEncoded}`);
-    console.log(`🔍 Numero: ${numero}`);
-    console.log(`🔍 ApiKey: ${apiKey ? apiKey.substring(0, 6) + '...' : 'VAZIA'}`);
-    console.log(`🔍 Instance: ${instance}`);
-    // ── FIM DIAGNÓSTICO ──
-
     for (const grupoId of GRUPOS) {
         try {
             const response = await axios.post(
@@ -35,22 +28,14 @@ async function gerenciarGrupos(telefone, acao) {
                 {
                     groupJid: grupoId,
                     action: acao,
-                    participants: [`${numero}@s.whatsapp.net`]
+                    participants: [numero]
                 },
                 { headers: { 'apikey': apiKey, 'Content-Type': 'application/json' }, timeout: 10000 }
             );
-            // ── DIAGNÓSTICO ──
-            console.log(`🔍 Response status: ${response.status}`);
-            console.log(`🔍 Response data: ${JSON.stringify(response.data)}`);
-            // ── FIM DIAGNÓSTICO ──
             resultados.push({ grupo: grupoId, sucesso: true });
             console.log(`✅ ${acao} | ${numero} | ${grupoId}`);
         } catch (err) {
             const msg = err.response?.data || err.message;
-            // ── DIAGNÓSTICO ──
-            console.log(`🔍 Erro status: ${err.response?.status}`);
-            console.log(`🔍 Erro data: ${JSON.stringify(err.response?.data)}`);
-            // ── FIM DIAGNÓSTICO ──
             resultados.push({ grupo: grupoId, sucesso: false, erro: JSON.stringify(msg) });
             console.error(`❌ ${acao} falhou | ${numero} | ${grupoId}:`, msg);
         }
@@ -59,14 +44,16 @@ async function gerenciarGrupos(telefone, acao) {
 }
 
 async function verificarNosGrupos(telefone) {
+    // Verifica se o número está no primeiro grupo como referência
     const evolutionUrl = process.env.EVOLUTION_URL;
     const apiKey = process.env.EVOLUTION_API_KEY;
     const instance = process.env.EVOLUTION_INSTANCE;
+    const instanceEncoded = encodeURIComponent(instance);
     const numero = formatarTelefone(telefone);
 
     try {
         const response = await axios.get(
-            `${evolutionUrl}/group/participants/${instance}?groupJid=${GRUPOS[0]}`,
+            `${evolutionUrl}/group/participants/${instanceEncoded}?groupJid=${GRUPOS[0]}`,
             { headers: { 'apikey': apiKey }, timeout: 10000 }
         );
         const participants = response.data?.participants || [];
@@ -81,7 +68,6 @@ async function enviarMensagemWhatsApp(telefone, mensagem) {
     const evolutionUrl = process.env.EVOLUTION_URL;
     const apiKey = process.env.EVOLUTION_API_KEY;
     const instance = process.env.EVOLUTION_INSTANCE;
-    // sendText mantém encodeURIComponent — funciona assim no outro projeto
     const instanceEncoded = encodeURIComponent(instance);
     const numero = formatarTelefone(telefone);
 
