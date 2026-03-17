@@ -266,7 +266,7 @@ tr:hover td { background: rgba(255,255,255,.02); }
   <button class="tab" onclick="tab('mensagens',this)">✉️ Mensagens</button>
   <button class="tab" onclick="tab('excecoes',this)">🛡️ Exceções</button>
   <button class="tab" onclick="tab('eventos',this)">📋 Eventos</button>
-  <button class="tab" onclick="tab('fila',this);conectarFila()">📨 Expedição <span id="fila-badge" style="display:none;background:var(--yellow);color:#000;border-radius:10px;padding:1px 6px;font-size:.65rem;margin-left:4px">0</span></button>
+  <button class="tab" onclick="abrirFila(this)">📨 Expedição <span id="fila-badge" style="display:none;background:var(--yellow);color:#000;border-radius:10px;padding:1px 6px;font-size:.65rem;margin-left:4px">0</span></button>
 </div>
 
 <div class="content">
@@ -390,8 +390,6 @@ tr:hover td { background: rgba(255,255,255,.02); }
 <script>
 let dados = {};
 let modalTipo = '';
-let sseConectado = false;
-let sseSource = null;
 
 // ── TABS ──
 function tab(nome, el) {
@@ -399,6 +397,16 @@ function tab(nome, el) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('panel-' + nome).classList.add('active');
+  // Para polling da fila se sair da aba
+  if (nome !== 'fila' && filaInterval) {
+    clearInterval(filaInterval);
+    filaInterval = null;
+  }
+}
+
+function abrirFila(el) {
+  tab('fila', el);
+  conectarFila(); // inicia polling só agora
 }
 
 // ── TOAST ──
@@ -572,65 +580,51 @@ async function runScheduler(tipo) {
   else toast(d.error || 'Erro', 'err');
 }
 
-// ── FILA / EXPEDIÇÃO ──
+// ── FILA / EXPEDIÇÃO — polling a cada 2s ──
+
+let filaInterval = null;
 
 function conectarFila() {
-  if (sseConectado) return;
-
-  const dot = document.getElementById('filaDot');
-  const txt = document.getElementById('filaStatusTxt');
-
-  sseSource = new EventSource('/admin/fila/eventos');
-
-  sseSource.onopen = () => {
-    sseConectado = true;
-    dot.className = 'fila-dot conectado';
-    txt.textContent = 'Conectado ao gateway — tempo real';
-  };
-
-  sseSource.onmessage = (e) => {
-    try {
-      const dados = JSON.parse(e.data);
-      processarEventoFila(dados);
-    } catch (_) {}
-  };
-
-  sseSource.onerror = () => {
-    sseConectado = false;
-    dot.className = 'fila-dot';
-    txt.textContent = 'Desconectado — reconectando...';
-    setTimeout(() => {
-      sseConectado = false;
-      conectarFila();
-    }, 5000);
-  };
+  if (filaInterval) return; // já está rodando
+  atualizarFila();
+  filaInterval = setInterval(atualizarFila, 2000);
 }
 
-function processarEventoFila(ev) {
+async function atualizarFila() {
   const dot = document.getElementById('filaDot');
-  const aguardandoDiv = document.getElementById('filaAguardando');
-  const aguardandoTxt = document.getElementById('filaAguardandoTxt');
+  const txt = document.getElementById('filaStatusTxt');
+  try {
+    const r = await fetch('/admin/fila');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const dados = await r.json();
 
-  if (ev.evento === 'enviando') {
-    dot.className = 'fila-dot enviando';
-  } else if (ev.evento === 'enviado' || ev.evento === 'erro_envio') {
     dot.className = 'fila-dot conectado';
-    aguardandoDiv.style.display = 'none';
-  } else if (ev.evento === 'aguardando') {
-    aguardandoDiv.style.display = 'flex';
-    aguardandoTxt.textContent = `Próximo envio em ${ev.segundos}s — ${ev.proximo}`;
+    txt.textContent = 'Gateway conectado — atualizando a cada 2s';
+
+    renderFila(dados.fila, dados.processando);
+    renderHistorico(dados.historico);
+
+    // badge na aba
+    const n = (dados.fila || []).length;
+    const badge = document.getElementById('fila-badge');
+    if (n > 0) { badge.style.display = 'inline'; badge.textContent = n; }
+    else { badge.style.display = 'none'; }
+    document.getElementById('filaContador').textContent = `Fila: ${n}`;
+
+    // indicador de processando
+    const aguardandoDiv = document.getElementById('filaAguardando');
+    if (dados.processando) {
+      aguardandoDiv.style.display = 'flex';
+      document.getElementById('filaAguardandoTxt').textContent = 'Enviando mensagem...';
+      dot.className = 'fila-dot enviando';
+    } else {
+      aguardandoDiv.style.display = 'none';
+    }
+
+  } catch (err) {
+    dot.className = 'fila-dot';
+    txt.textContent = 'Gateway indisponível — tentando reconectar...';
   }
-
-  if (ev.fila !== undefined) renderFila(ev.fila, ev.processando);
-  if (ev.historico !== undefined) renderHistorico(ev.historico);
-
-  // badge na aba
-  const n = (ev.fila || []).length;
-  const badge = document.getElementById('fila-badge');
-  if (n > 0) { badge.style.display = 'inline'; badge.textContent = n; }
-  else { badge.style.display = 'none'; }
-
-  document.getElementById('filaContador').textContent = `Fila: ${n}`;
 }
 
 function renderFila(fila, processando) {
