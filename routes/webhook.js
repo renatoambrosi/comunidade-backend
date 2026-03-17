@@ -5,7 +5,7 @@ const {
     atualizarStatus, atualizarNextPayment, agendarRemocao, cancelarRemocao,
     isExcecao, registrarEvento, limparMensagensEnviadas
 } = require('../db');
-const { adicionarNosGrupos, removerDosGrupos, formatarTelefone } = require('../whatsapp');
+const { adicionarNosGrupos, removerDosGrupos, verificarNosGrupos, formatarTelefone } = require('../whatsapp');
 
 // ── HELPERS ──
 
@@ -120,7 +120,7 @@ async function handleOrderApproved(dados, body) {
         return;
     }
 
-    const resultados = await adicionarNosGrupos(telefone_formatado);
+    const resultados = await adicionarNosGrupos(telefone_formatado, nome);
     const sucesso = resultados.some(r => r.sucesso);
 
     if (sucesso) await marcarGruposAdicionado(subscription_id);
@@ -147,10 +147,9 @@ async function handleSubscriptionRenewed(dados, body) {
     const telefone_formatado = membroAtual?.telefone_formatado || (telefone ? formatarTelefone(telefone) : null);
 
     if (telefone_formatado && !await isExcecao(telefone_formatado)) {
-        const { verificarNosGrupos } = require('../whatsapp');
         const estaNoGrupo = await verificarNosGrupos(telefone_formatado);
         if (!estaNoGrupo) {
-            const resultados = await adicionarNosGrupos(telefone_formatado);
+            const resultados = await adicionarNosGrupos(telefone_formatado, nome || membroAtual?.nome);
             await log({ subscription_id, order_id, telefone, nome, evento: 'subscription_renewed', acao: 'readicionar_grupos', sucesso: resultados.some(r => r.sucesso), detalhes: JSON.stringify(resultados) });
         }
     }
