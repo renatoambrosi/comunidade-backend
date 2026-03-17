@@ -32,7 +32,6 @@
 html { font-size: 14px; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-/* HEADER */
 header {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -52,7 +51,6 @@ header {
 }
 .btn-refresh:hover { color: var(--text); border-color: var(--accent); }
 
-/* TABS */
 .tabs {
   display: flex; gap: 2px; padding: 16px 28px 0;
   border-bottom: 1px solid var(--border); background: var(--surface);
@@ -67,12 +65,10 @@ header {
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 .tab:hover { color: var(--text); }
 
-/* CONTENT */
 .content { padding: 24px 28px; max-width: 1400px; }
 .panel { display: none; }
 .panel.active { display: block; }
 
-/* STATS */
 .stats { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
 .stat {
   background: var(--surface); border: 1px solid var(--border);
@@ -86,7 +82,6 @@ header {
 .stat.blue .num { color: var(--blue); }
 .stat.orange .num { color: var(--orange); }
 
-/* CARD */
 .card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 12px; overflow: hidden; margin-bottom: 20px;
@@ -98,7 +93,6 @@ header {
 }
 .card-header .actions { display: flex; gap: 8px; align-items: center; }
 
-/* TABLE */
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th {
@@ -113,7 +107,6 @@ tr:hover td { background: rgba(255,255,255,.02); }
 .empty { text-align: center; padding: 40px; color: var(--muted); font-size: .85rem; }
 .mono { font-family: 'DM Mono', monospace; font-size: .78rem; color: var(--muted2); }
 
-/* BADGES */
 .badge {
   display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px;
   font-size: .68rem; font-weight: 600; white-space: nowrap;
@@ -126,7 +119,6 @@ tr:hover td { background: rgba(255,255,255,.02); }
 .badge-gray { background: rgba(255,255,255,.06); color: var(--muted2); }
 .badge-purple { background: var(--accent-bg); color: var(--accent); }
 
-/* BUTTONS */
 .btn {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 5px 10px; border-radius: 6px; border: none; cursor: pointer;
@@ -145,7 +137,6 @@ tr:hover td { background: rgba(255,255,255,.02); }
 
 .action-row { display: flex; gap: 4px; flex-wrap: wrap; }
 
-/* MODAL */
 .overlay {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,.7); z-index: 100;
@@ -170,7 +161,6 @@ tr:hover td { background: rgba(255,255,255,.02); }
 .modal-btns { display: flex; gap: 8px; margin-top: 20px; }
 .modal-btns .btn { flex: 1; justify-content: center; height: 38px; font-size: .85rem; }
 
-/* MENSAGENS EDITOR */
 .msg-card {
   background: var(--surface2); border: 1px solid var(--border2);
   border-radius: 10px; padding: 16px; margin-bottom: 12px;
@@ -188,7 +178,6 @@ tr:hover td { background: rgba(255,255,255,.02); }
 .msg-card .msg-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
 .msg-hint { font-size: .7rem; color: var(--muted); }
 
-/* TOAST */
 .toast {
   position: fixed; bottom: 24px; right: 24px;
   background: var(--surface2); border: 1px solid var(--border2);
@@ -201,8 +190,65 @@ tr:hover td { background: rgba(255,255,255,.02); }
 .toast.ok { border-color: var(--green); color: var(--green); }
 .toast.err { border-color: var(--red); color: var(--red); }
 
-/* EVENTO */
 .evento-row td { font-size: .78rem; }
+
+/* FILA */
+.fila-status {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px; border-bottom: 1px solid var(--border);
+  font-size: .78rem; color: var(--muted2);
+}
+.fila-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--muted); transition: background 300ms;
+}
+.fila-dot.conectado { background: var(--green); }
+.fila-dot.enviando { background: var(--yellow); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+.fila-vazia {
+  padding: 48px 20px; text-align: center;
+  color: var(--muted); font-size: .85rem;
+}
+.fila-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 20px; border-bottom: 1px solid var(--border);
+  transition: background 200ms;
+}
+.fila-item:last-child { border-bottom: none; }
+.fila-item:hover { background: rgba(255,255,255,.02); }
+.fila-pos {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--surface2); border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: .68rem;
+  color: var(--muted2); flex-shrink: 0;
+}
+.fila-pos.imediato { background: var(--yellow-bg); border-color: var(--yellow); color: var(--yellow); }
+.fila-info { flex: 1; min-width: 0; }
+.fila-nome { font-size: .82rem; font-weight: 600; }
+.fila-preview { font-size: .72rem; color: var(--muted2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.fila-meta { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+
+.hist-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 20px; border-bottom: 1px solid var(--border);
+  font-size: .78rem;
+}
+.hist-item:last-child { border-bottom: none; }
+.hist-ok { color: var(--green); font-size: .72rem; }
+.hist-err { color: var(--red); font-size: .72rem; }
+.hist-info { flex: 1; min-width: 0; }
+.hist-nome { font-weight: 600; }
+.hist-preview { color: var(--muted2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hist-ts { font-family: 'DM Mono', monospace; font-size: .68rem; color: var(--muted); flex-shrink: 0; }
+
+.fila-aguardando {
+  padding: 10px 20px; background: var(--yellow-bg);
+  border-bottom: 1px solid var(--border);
+  font-size: .78rem; color: var(--yellow);
+  display: flex; align-items: center; gap: 8px;
+}
 </style>
 </head>
 <body>
@@ -220,11 +266,11 @@ tr:hover td { background: rgba(255,255,255,.02); }
   <button class="tab" onclick="tab('mensagens',this)">✉️ Mensagens</button>
   <button class="tab" onclick="tab('excecoes',this)">🛡️ Exceções</button>
   <button class="tab" onclick="tab('eventos',this)">📋 Eventos</button>
+  <button class="tab" onclick="tab('fila',this);conectarFila()">📨 Expedição <span id="fila-badge" style="display:none;background:var(--yellow);color:#000;border-radius:10px;padding:1px 6px;font-size:.65rem;margin-left:4px">0</span></button>
 </div>
 
 <div class="content">
 
-  <!-- STATS -->
   <div class="stats" id="statsBar">
     <div class="stat green"><div class="num" id="s-ativos">—</div><div class="lbl">Ativos</div></div>
     <div class="stat yellow"><div class="num" id="s-atrasados">—</div><div class="lbl">Atrasados</div></div>
@@ -239,8 +285,8 @@ tr:hover td { background: rgba(255,255,255,.02); }
       <div class="card-header">
         Membros
         <div class="actions">
-          <button class="btn btn-ghost" onclick="runScheduler('remocoes')" title="Executar verificação de remoções agora">⏰ Forçar Remoções</button>
-          <button class="btn btn-ghost" onclick="runScheduler('mensagens')" title="Executar ciclo de mensagens agora">📨 Forçar Mensagens</button>
+          <button class="btn btn-ghost" onclick="runScheduler('remocoes')">⏰ Forçar Remoções</button>
+          <button class="btn btn-ghost" onclick="runScheduler('mensagens')">📨 Forçar Mensagens</button>
           <button class="btn btn-add" onclick="abrirModal('membro')">+ Adicionar</button>
         </div>
       </div>
@@ -293,6 +339,38 @@ tr:hover td { background: rgba(255,255,255,.02); }
     </div>
   </div>
 
+  <!-- FILA / EXPEDIÇÃO -->
+  <div class="panel" id="panel-fila">
+
+    <!-- Status da conexão SSE -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="fila-status">
+        <div class="fila-dot" id="filaDot"></div>
+        <span id="filaStatusTxt">Conectando ao gateway...</span>
+        <span style="margin-left:auto;font-family:'DM Mono',monospace" id="filaContador">Fila: 0</span>
+      </div>
+      <div id="filaAguardando" style="display:none" class="fila-aguardando">
+        ⏳ <span id="filaAguardandoTxt"></span>
+      </div>
+    </div>
+
+    <!-- Mensagens na fila -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header">
+        Na fila
+        <span style="font-size:.72rem;color:var(--muted);font-weight:400">1 mensagem por minuto — clique em ✕ para cancelar</span>
+      </div>
+      <div id="filaLista"><div class="fila-vazia">Fila vazia</div></div>
+    </div>
+
+    <!-- Histórico -->
+    <div class="card">
+      <div class="card-header">Últimas enviadas</div>
+      <div id="filaHistorico"><div class="fila-vazia">Nenhuma mensagem enviada ainda</div></div>
+    </div>
+
+  </div>
+
 </div>
 
 <!-- MODAL -->
@@ -312,6 +390,8 @@ tr:hover td { background: rgba(255,255,255,.02); }
 <script>
 let dados = {};
 let modalTipo = '';
+let sseConectado = false;
+let sseSource = null;
 
 // ── TABS ──
 function tab(nome, el) {
@@ -337,13 +417,9 @@ function fmt(iso) {
 function esc(s) { return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function badgeStatus(s) {
-  const map = {
-    ativo: 'green', atrasado: 'yellow', cancelado: 'orange',
-    reembolsado: 'blue', chargeback: 'red', removido: 'gray'
-  };
+  const map = { ativo: 'green', atrasado: 'yellow', cancelado: 'orange', reembolsado: 'blue', chargeback: 'red', removido: 'gray' };
   return `<span class="badge badge-${map[s]||'gray'}">${s}</span>`;
 }
-
 function badgeMetodo(m) {
   if (!m) return '<span class="badge badge-gray">—</span>';
   const isPix = m.toLowerCase().includes('pix');
@@ -356,7 +432,6 @@ async function carregar() {
     const r = await fetch('/admin/dados');
     if (r.status === 401) { location.reload(); return; }
     dados = await r.json();
-
     const s = dados.stats || {};
     document.getElementById('s-ativos').textContent = s.ativos || 0;
     document.getElementById('s-atrasados').textContent = s.atrasados || 0;
@@ -364,7 +439,6 @@ async function carregar() {
     document.getElementById('s-chargebacks').textContent = s.chargebacks || 0;
     document.getElementById('s-total').textContent = s.total || 0;
     document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('pt-BR');
-
     renderMembros();
     renderMensagens();
     renderExcecoes();
@@ -379,7 +453,6 @@ function renderMembros() {
   const tb = document.getElementById('tbMembros');
   const membros = dados.membros || [];
   if (!membros.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">Nenhum membro</td></tr>'; return; }
-
   tb.innerHTML = membros.map(m => {
     const temRemocao = m.remocao_agendada && m.status !== 'removido';
     return `<tr>
@@ -418,7 +491,6 @@ async function cancelarRemocao(sub_id) {
 function renderMensagens() {
   const msgs = dados.mensagens || [];
   if (!msgs.length) { document.getElementById('msgEditor').innerHTML = '<p style="color:var(--muted)">Sem mensagens configuradas</p>'; return; }
-
   document.getElementById('msgEditor').innerHTML = msgs.map(m => `
     <div class="msg-card">
       <div class="msg-header">
@@ -439,10 +511,7 @@ function renderMensagens() {
 
 async function salvarMensagem(chave) {
   const texto = document.getElementById('msg-' + chave).value;
-  const r = await fetch(`/admin/mensagem/${chave}`, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ texto })
-  });
+  const r = await fetch(`/admin/mensagem/${chave}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ texto }) });
   const d = await r.json();
   if (d.success) toast('Mensagem salva!');
   else toast(d.error || 'Erro', 'err');
@@ -475,7 +544,6 @@ function renderEventos() {
   const tb = document.getElementById('tbEventos');
   const evs = dados.eventos || [];
   if (!evs.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">Sem eventos</td></tr>'; return; }
-
   const eventoColor = {
     order_approved: 'green', subscription_renewed: 'blue',
     subscription_late: 'yellow', order_refunded: 'orange',
@@ -483,7 +551,6 @@ function renderEventos() {
     admin_adicionar: 'purple', admin_remover: 'red',
     scheduler_remocao: 'red', scheduler_mensagem: 'blue'
   };
-
   tb.innerHTML = evs.map(e => `<tr class="evento-row">
     <td class="mono">${fmt(e.criado_em)}</td>
     <td>${esc(e.nome||'—')}</td>
@@ -498,12 +565,119 @@ function renderEventos() {
 
 // ── SCHEDULER MANUAL ──
 async function runScheduler(tipo) {
-  const labels = { mensagens: 'mensagens', remocoes: 'remoções' };
-  toast(`Executando ciclo de ${labels[tipo]}...`);
+  toast(`Executando ciclo de ${tipo}...`);
   const r = await fetch(`/admin/scheduler/${tipo}`, { method: 'POST' });
   const d = await r.json();
   if (d.success) { toast(d.msg); carregar(); }
   else toast(d.error || 'Erro', 'err');
+}
+
+// ── FILA / EXPEDIÇÃO ──
+
+function conectarFila() {
+  if (sseConectado) return;
+
+  const dot = document.getElementById('filaDot');
+  const txt = document.getElementById('filaStatusTxt');
+
+  sseSource = new EventSource('/admin/fila/eventos');
+
+  sseSource.onopen = () => {
+    sseConectado = true;
+    dot.className = 'fila-dot conectado';
+    txt.textContent = 'Conectado ao gateway — tempo real';
+  };
+
+  sseSource.onmessage = (e) => {
+    try {
+      const dados = JSON.parse(e.data);
+      processarEventoFila(dados);
+    } catch (_) {}
+  };
+
+  sseSource.onerror = () => {
+    sseConectado = false;
+    dot.className = 'fila-dot';
+    txt.textContent = 'Desconectado — reconectando...';
+    setTimeout(() => {
+      sseConectado = false;
+      conectarFila();
+    }, 5000);
+  };
+}
+
+function processarEventoFila(ev) {
+  const dot = document.getElementById('filaDot');
+  const aguardandoDiv = document.getElementById('filaAguardando');
+  const aguardandoTxt = document.getElementById('filaAguardandoTxt');
+
+  if (ev.evento === 'enviando') {
+    dot.className = 'fila-dot enviando';
+  } else if (ev.evento === 'enviado' || ev.evento === 'erro_envio') {
+    dot.className = 'fila-dot conectado';
+    aguardandoDiv.style.display = 'none';
+  } else if (ev.evento === 'aguardando') {
+    aguardandoDiv.style.display = 'flex';
+    aguardandoTxt.textContent = `Próximo envio em ${ev.segundos}s — ${ev.proximo}`;
+  }
+
+  if (ev.fila !== undefined) renderFila(ev.fila, ev.processando);
+  if (ev.historico !== undefined) renderHistorico(ev.historico);
+
+  // badge na aba
+  const n = (ev.fila || []).length;
+  const badge = document.getElementById('fila-badge');
+  if (n > 0) { badge.style.display = 'inline'; badge.textContent = n; }
+  else { badge.style.display = 'none'; }
+
+  document.getElementById('filaContador').textContent = `Fila: ${n}`;
+}
+
+function renderFila(fila, processando) {
+  const el = document.getElementById('filaLista');
+  if (!fila || !fila.length) {
+    el.innerHTML = '<div class="fila-vazia">Fila vazia ✓</div>';
+    return;
+  }
+  el.innerHTML = fila.map((item, i) => `
+    <div class="fila-item">
+      <div class="fila-pos ${item.imediato ? 'imediato' : ''}">${item.imediato ? '⚡' : i + 1}</div>
+      <div class="fila-info">
+        <div class="fila-nome">${esc(item.nome)} <span class="badge badge-gray">${esc(item.origem)}</span></div>
+        <div class="fila-preview">${esc(item.preview)}...</div>
+      </div>
+      <div class="fila-meta">
+        <span class="mono" style="font-size:.68rem">${fmt(item.entrou_em)}</span>
+        <button class="btn btn-danger" onclick="cancelarDaFila(${item.id},'${esc(item.nome)}')">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderHistorico(historico) {
+  const el = document.getElementById('filaHistorico');
+  if (!historico || !historico.length) {
+    el.innerHTML = '<div class="fila-vazia">Nenhuma mensagem enviada ainda</div>';
+    return;
+  }
+  el.innerHTML = historico.map(item => `
+    <div class="hist-item">
+      <span class="${item.sucesso ? 'hist-ok' : 'hist-err'}">${item.sucesso ? '✓' : '✕'}</span>
+      <div class="hist-info">
+        <div class="hist-nome">${esc(item.nome)} <span class="badge badge-gray">${esc(item.origem)}</span></div>
+        <div class="hist-preview">${esc(item.preview)}...</div>
+      </div>
+      <span class="hist-ts">${fmt(item.enviado_em)}</span>
+    </div>
+  `).join('');
+}
+
+async function cancelarDaFila(id, nome) {
+  if (!confirm(`Cancelar mensagem para ${nome}?`)) return;
+  const r = await fetch(`/admin/fila/${id}`, { method: 'DELETE' });
+  const d = await r.json();
+  if (d.success) toast(`Mensagem para ${nome} cancelada`);
+  else toast(d.error || 'Erro ao cancelar', 'err');
 }
 
 // ── MODAL ──
@@ -511,7 +685,6 @@ function abrirModal(tipo) {
   modalTipo = tipo;
   const titulos = { membro: '+ Adicionar Membro', excecao: '+ Adicionar Exceção' };
   document.getElementById('modalTitulo').textContent = titulos[tipo];
-
   const corpos = {
     membro: `
       <div class="field"><label>Nome *</label><input id="m-nome" placeholder="Nome completo"/></div>
@@ -532,14 +705,11 @@ function abrirModal(tipo) {
       <div class="field"><label>Motivo</label><input id="e-motivo" placeholder="Ex: Moderador, Parceiro..."/></div>
     `
   };
-
   document.getElementById('modalBody').innerHTML = corpos[tipo];
   document.getElementById('overlay').classList.add('show');
 }
 
-function fecharModal() {
-  document.getElementById('overlay').classList.remove('show');
-}
+function fecharModal() { document.getElementById('overlay').classList.remove('show'); }
 
 async function confirmarModal() {
   try {
@@ -547,26 +717,16 @@ async function confirmarModal() {
       const nome = document.getElementById('m-nome').value.trim();
       const telefone = document.getElementById('m-tel').value.trim();
       if (!nome || !telefone) { toast('Nome e telefone obrigatórios', 'err'); return; }
-      const body = {
-        nome, telefone,
-        email: document.getElementById('m-email').value.trim(),
-        payment_method: document.getElementById('m-method').value,
-        next_payment: document.getElementById('m-next').value || null
-      };
+      const body = { nome, telefone, email: document.getElementById('m-email').value.trim(), payment_method: document.getElementById('m-method').value, next_payment: document.getElementById('m-next').value || null };
       const r = await fetch('/admin/membro/adicionar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const d = await r.json();
-      if (d.success) { toast('Membro adicionado e grupos atualizados!'); fecharModal(); carregar(); }
+      if (d.success) { toast('Membro adicionado!'); fecharModal(); carregar(); }
       else toast(d.error || 'Erro', 'err');
     }
-
     if (modalTipo === 'excecao') {
       const telefone = document.getElementById('e-tel').value.trim();
       if (!telefone) { toast('Telefone obrigatório', 'err'); return; }
-      const body = {
-        telefone,
-        nome: document.getElementById('e-nome').value.trim(),
-        motivo: document.getElementById('e-motivo').value.trim()
-      };
+      const body = { telefone, nome: document.getElementById('e-nome').value.trim(), motivo: document.getElementById('e-motivo').value.trim() };
       const r = await fetch('/admin/excecao', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const d = await r.json();
       if (d.success) { toast('Exceção adicionada!'); fecharModal(); carregar(); }
