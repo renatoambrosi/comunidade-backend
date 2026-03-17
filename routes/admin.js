@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
+const axios = require('axios');
 const {
     listarMembros, listarExcecoes, adicionarExcecao, removerExcecao,
     listarMensagensConfig, atualizarMensagemConfig,
@@ -23,6 +24,10 @@ function autenticar(req, res, next) {
     return res.status(401).send('Usuário ou senha incorretos');
 }
 
+function gatewayHeaders() {
+    return { 'x-gateway-token': process.env.GATEWAY_TOKEN };
+}
+
 // ── DASHBOARD ──
 router.get('/admin', autenticar, (req, res) => {
     res.sendFile(path.join(__dirname, '../dashboard.html'));
@@ -39,6 +44,71 @@ router.get('/admin/dados', autenticar, async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+});
+
+// ── FILA — proxy para o gateway ──
+
+// GET /admin/fila — estado atual
+router.get('/admin/fila', autenticar, async (req, res) => {
+    try {
+        const resp = await axios.get(
+            `${process.env.GATEWAY_URL}/fila`,
+            { headers: gatewayHeaders(), timeout: 5000 }
+        );
+        res.json(resp.data);
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao buscar fila do gateway', detalhe: err.message });
+    }
+});
+
+// DELETE /admin/fila/:id — cancelar mensagem
+router.delete('/admin/fila/:id', autenticar, async (req, res) => {
+    try {
+        const resp = await axios.delete(
+            `${process.env.GATEWAY_URL}/fila/${req.params.id}`,
+            { headers: gatewayHeaders(), timeout: 5000 }
+        );
+        res.json(resp.data);
+    } catch (err) {
+        const status = err.response?.status || 500;
+        res.status(status).json({ error: err.response?.data?.error || err.message });
+    }
+});
+
+// GET /admin/fila/eventos — SSE em tempo real (proxy do gateway)
+router.get('/admin/fila/eventos', autenticar, async (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    let gatewayReq = null;
+
+    try {
+        gatewayReq = await axios.get(
+            `${process.env.GATEWAY_URL}/eventos`,
+            {
+                headers: { ...gatewayHeaders(), Accept: 'text/event-stream' },
+                responseType: 'stream',
+                timeout: 0,
+            }
+        );
+
+        gatewayReq.data.on('data', chunk => {
+            try { res.write(chunk); } catch (_) {}
+        });
+
+        gatewayReq.data.on('end', () => res.end());
+        gatewayReq.data.on('error', () => res.end());
+
+    } catch (err) {
+        res.write(`data: ${JSON.stringify({ evento: 'erro_conexao', mensagem: err.message })}\n\n`);
+        res.end();
+    }
+
+    req.on('close', () => {
+        if (gatewayReq?.data) gatewayReq.data.destroy();
+    });
 });
 
 // ── MEMBROS ──
@@ -59,7 +129,7 @@ router.post('/admin/membro/adicionar', autenticar, async (req, res) => {
         });
 
         if (!await isExcecao(tel_fmt)) {
-            const resultados = await adicionarNosGrupos(tel_fmt);
+            const resultados = await adicionarNosGrupos(tel_fmt, nome);
             await registrarEvento({
                 subscription_id: sub_id, telefone, nome,
                 evento: 'admin_adicionar', acao: 'adicionar_grupos',
