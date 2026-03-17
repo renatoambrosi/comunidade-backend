@@ -35,7 +35,7 @@ async function gerenciarGrupos(telefone, acao) {
                 {
                     groupJid: grupoId,
                     action: acao,
-                    participants: [numero]
+                    participants: [`${numero}@s.whatsapp.net`]
                 },
                 { headers: { 'apikey': apiKey, 'Content-Type': 'application/json' }, timeout: 10000 }
             );
