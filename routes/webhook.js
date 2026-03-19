@@ -7,10 +7,13 @@ const {
 } = require('../db');
 const { adicionarNosGrupos, removerDosGrupos, verificarNosGrupos, formatarTelefone } = require('../whatsapp');
 
+// ── PRODUCT ID DA COMUNIDADE MENTE DE OURO ──
+// Apenas webhooks deste produto são processados. Todos os outros são ignorados.
+const PRODUCT_ID_COMUNIDADE = '36159bc0-1b77-11f1-8ed2-99854c89cb83';
+
 // ── HELPERS ──
 
 function extrairDados(body) {
-    // Kiwify envia tudo dentro de "order"
     const order = body.order || body.Order || body;
     const customer = order.Customer || order.customer || body.Customer || body.customer || {};
     const sub = order.Subscription || order.subscription || body.Subscription || body.subscription || {};
@@ -28,6 +31,12 @@ function extrairDados(body) {
     return { nome, email, telefone, subscription_id, order_id, payment_method, next_payment };
 }
 
+function extrairProductId(body) {
+    const order = body.order || body.Order || body;
+    const product = order.Product || order.product || body.Product || body.product || {};
+    return product.product_id || '';
+}
+
 async function log(dados) {
     try {
         await registrarEvento(dados);
@@ -41,11 +50,17 @@ async function log(dados) {
 router.post('/kiwify', async (req, res) => {
     res.status(200).json({ received: true });
 
-    // evento fica dentro de order no Kiwify
     const order = req.body.order || req.body.Order || req.body;
     const evento = order.webhook_event_type || req.body.webhook_event_type || req.body.event || '';
 
     console.log(`\n🔔 WEBHOOK: ${evento}`, JSON.stringify(req.body).substring(0, 400));
+
+    // ── FILTRO DE PRODUTO ──
+    const product_id = extrairProductId(req.body);
+    if (product_id !== PRODUCT_ID_COMUNIDADE) {
+        console.log(`⚪ Produto ignorado: ${product_id} — não é a Comunidade Mente de Ouro`);
+        return;
+    }
 
     try {
         const dados = extrairDados(req.body);
